@@ -13,5 +13,5 @@ COPY static ./static
 
 RUN mkdir -p /app/data
 
-EXPOSE 5060
-CMD ["gunicorn", "--bind", "0.0.0.0:5060", "--workers", "2", "--threads", "2", "--timeout", "30", "app:app"]
+EXPOSE 5057
+CMD ["gunicorn", "--bind", "0.0.0.0:5057", "--workers", "2", "--threads", "2", "--timeout", "30", "app:app"]

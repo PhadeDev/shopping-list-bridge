@@ -19,7 +19,7 @@ python -m venv .venv
 .venv\Scripts\python app.py
 ```
 
-The app listens on port 5060. Set `SHOPPING_LIST_DATA_DIR` to override the database directory.
+The app listens on port 5057. Set `SHOPPING_LIST_DATA_DIR` to override the database directory.
 
 ## NAS deployment
 
@@ -31,7 +31,7 @@ cd /volume1/docker/shopping-list-bridge
 /var/packages/ContainerManager/target/usr/bin/docker compose up -d
 ```
 
-The Compose file binds only to the NAS LAN address at `192.168.0.200:5060`. It is not intended for internet exposure.
+The Compose file binds only to the NAS LAN address at `192.168.0.200:5057`. It is not intended for internet exposure. Port 5060 is deliberately avoided because browsers reserve it for SIP traffic and block normal web navigation to it.
 
 ## Userscript
 

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Tesco Shopping List Reminder
 // @namespace    phaderon.shopping-list-bridge
-// @version      1.0.0
+// @version      1.0.1
 // @description  Keeps the active NAS shopping list visible on Tesco grocery pages.
 // @match        https://www.tesco.com/shop/en-GB/*
 // @match        https://www.tesco.com/groceries/en-GB/*
@@ -17,7 +17,7 @@
 (function () {
     'use strict';
 
-    const API_BASE = 'http://192.168.0.200:5060';
+    const API_BASE = 'http://192.168.0.200:5057';
     const HOST_ID = 'phade-shopping-list-host';
     const REFRESH_MS = 15000;
     let host;
