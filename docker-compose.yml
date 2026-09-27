@@ -1,0 +1,17 @@
+services:
+  shopping-list-bridge:
+    build: .
+    container_name: shopping-list-bridge
+    restart: unless-stopped
+    environment:
+      SHOPPING_LIST_DATA_DIR: /app/data
+    ports:
+      - "192.168.0.200:5060:5060"
+    volumes:
+      - ./data:/app/data
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5060/healthz', timeout=3)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
