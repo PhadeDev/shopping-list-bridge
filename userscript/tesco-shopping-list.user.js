@@ -1,10 +1,10 @@
 // ==UserScript==
 // @name         Tesco Shopping List Reminder
 // @namespace    phaderon.shopping-list-bridge
-// @version      1.0.1
+// @version      1.1.0
 // @description  Keeps the active NAS shopping list visible on Tesco grocery pages.
-// @match        https://www.tesco.com/shop/en-GB/*
-// @match        https://www.tesco.com/groceries/en-GB/*
+// @match        https://www.tesco.com/*
+// @match        https://tesco.com/*
 // @connect      192.168.0.200
 // @downloadURL  https://raw.githubusercontent.com/PhadeDev/shopping-list-bridge/main/userscript/tesco-shopping-list.user.js
 // @updateURL    https://raw.githubusercontent.com/PhadeDev/shopping-list-bridge/main/userscript/tesco-shopping-list.user.js
@@ -25,6 +25,17 @@
     let items = [];
     let offline = false;
     let refreshTimer;
+    let navigationTimer;
+
+    function isGroceryPage(url = window.location.href) {
+        try {
+            const parsed = new URL(url);
+            return /^(?:www\.)?tesco\.com$/i.test(parsed.hostname)
+                && /^\/(?:shop|groceries)\/en-GB(?:\/|$)/i.test(parsed.pathname);
+        } catch (_error) {
+            return false;
+        }
+    }
 
     function request(method, path, body) {
         return new Promise((resolve, reject) => {
@@ -205,6 +216,7 @@
     }
 
     async function refresh() {
+        if (!isGroceryPage()) return;
         try {
             const body = await request('GET', '/api/items?status=active');
             items = body.items;
@@ -215,21 +227,45 @@
         render();
     }
 
-    function start() {
+    function updatePageState(forceRefresh = false) {
+        if (!isGroceryPage()) {
+            if (host?.isConnected) host.remove();
+            host = null;
+            shadow = null;
+            return;
+        }
+
+        const alreadyMounted = Boolean(document.getElementById(HOST_ID));
         ensureMounted();
-        refresh();
-        refreshTimer = setInterval(refresh, REFRESH_MS);
-        window.addEventListener('focus', refresh);
-        window.addEventListener('resize', restorePosition);
-        document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(); });
-        new MutationObserver(() => {
-            if (!document.getElementById(HOST_ID)) {
-                ensureMounted();
-                refresh();
+        if (!alreadyMounted || forceRefresh) refresh();
+    }
+
+    function start() {
+        let lastUrl = window.location.href;
+        updatePageState(true);
+
+        refreshTimer = setInterval(() => {
+            if (isGroceryPage()) refresh();
+        }, REFRESH_MS);
+
+        navigationTimer = setInterval(() => {
+            const currentUrl = window.location.href;
+            const urlChanged = currentUrl !== lastUrl;
+            lastUrl = currentUrl;
+            if (urlChanged || (isGroceryPage() && !document.getElementById(HOST_ID))) {
+                updatePageState(urlChanged);
             }
-        }).observe(document.documentElement, { childList: true });
+        }, 500);
+
+        window.addEventListener('focus', () => updatePageState(true));
+        window.addEventListener('resize', () => { if (host?.isConnected) restorePosition(); });
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) updatePageState(true);
+        });
     }
 
     if (document.documentElement) start();
-    else document.addEventListener('readystatechange', () => { if (document.documentElement && !refreshTimer) start(); });
+    else document.addEventListener('readystatechange', () => {
+        if (document.documentElement && !refreshTimer && !navigationTimer) start();
+    });
 })();

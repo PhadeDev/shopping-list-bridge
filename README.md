@@ -7,7 +7,7 @@ A tiny LAN-only shopping list hosted on the NAS, with a separate Violentmonkey/T
 - Phone-first list UI with quantity, completion, undo, and deletion
 - Case-insensitive duplicate items increase the existing quantity
 - SQLite storage persisted outside the Docker container
-- Tesco overlay refreshes every 15 seconds, survives Tesco navigation, minimises, and can be dragged
+- Tesco overlay refreshes every 15 seconds, survives Tesco single-page navigation from the wider site, minimises, and can be dragged
 - Tesco overlay uses Shadow DOM so site styles do not leak into it
 
 ## Local development
